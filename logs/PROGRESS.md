@@ -2,6 +2,9 @@
 
 Newest first. One entry per work session. Keep it short.
 
+## 2026-10-30 (redesign)
+- Site deployed and working. Redesign written (D21), untested. Copy `app/index.html`, `app/src/App.jsx`, `app/src/styles.css`, run locally, then push.
+
 ## 2026-10-30 (admin)
 - Admin user created in Supabase Auth and added to `admins` table (UID 83e1fbd6-fe38-4898-b160-80fc09b00fe3). Insert succeeded.
 - Phase 1 complete.

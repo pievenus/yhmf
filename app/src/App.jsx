@@ -1,9 +1,20 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { HashRouter, Routes, Route, NavLink, Link, useParams } from 'react-router-dom'
 import { supabase } from './supabase'
 
 const domainOf = (url) => {
   try { return new URL(url).hostname.replace(/^www\./, '') } catch { return url }
+}
+
+function Fav({ url }) {
+  const [bad, setBad] = useState(false)
+  const d = domainOf(url)
+  return bad ? (
+    <span className="fav letter" aria-hidden="true">{d[0]?.toUpperCase()}</span>
+  ) : (
+    <img className="fav" alt="" loading="lazy" width="36" height="36"
+      src={`https://www.google.com/s2/favicons?domain=${d}&sz=64`} onError={() => setBad(true)} />
+  )
 }
 
 function useDirectory() {
@@ -27,41 +38,71 @@ function useDirectory() {
 function Directory({ cats, links, state }) {
   const { slug } = useParams()
   const [q, setQ] = useState('')
+  const ref = useRef(null)
   const cat = cats.find((c) => c.slug === slug)
+  const pool = useMemo(() => links.filter((l) => l.status === 'approved'), [links])
   const shown = useMemo(() => {
     const t = q.trim().toLowerCase()
-    return links.filter(
+    return pool.filter(
       (l) =>
-        l.status === 'approved' &&
         (!cat || l.category_id === cat.id) &&
         (!t || [l.title, l.description, l.url, ...(l.tags || [])].join(' ').toLowerCase().includes(t))
     )
-  }, [links, cat, q])
+  }, [pool, cat, q])
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+        e.preventDefault()
+        ref.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <>
-      <input
-        className="search"
-        type="search"
-        placeholder={cat ? `Search in ${cat.name}` : 'Search all links'}
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        aria-label="Search links"
-      />
-      <h1>{cat ? cat.name : 'All links'}</h1>
-      {cat?.description && <p className="muted">{cat.description}</p>}
+      <section className="hero">
+        <h1>{cat ? cat.name : 'Find the right site, fast'}</h1>
+        <p className="lede">{cat?.description || `${pool.length} links in ${cats.length} categories`}</p>
+        <div className="searchbox">
+          <input
+            ref={ref}
+            type="search"
+            placeholder={cat ? `Search in ${cat.name}` : 'Search all links'}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            aria-label="Search links"
+          />
+          <kbd aria-hidden="true">/</kbd>
+        </div>
+      </section>
       {state === 'loading' && <p className="muted">Loading links…</p>}
       {state === 'error' && <p className="error">Could not load links. Check the Supabase URL and key, then reload.</p>}
+      {state === 'ready' && (
+        <p className="count-line">
+          {shown.length} {shown.length === 1 ? 'link' : 'links'}{q.trim() && ` matching “${q.trim()}”`}
+        </p>
+      )}
       {state === 'ready' && shown.length === 0 && <p className="muted">No links match. Try a different word or category.</p>}
       <ul className="list">
         {shown.map((l) => (
           <li key={l.id} className="row">
-            <div className="line">
-              <a href={l.url} target="_blank" rel="noopener noreferrer" className="title">{l.title}</a>
-              <span className="domain">{domainOf(l.url)}</span>
-              {l.is_broken && <span className="down">may be down</span>}
-            </div>
-            {l.description && <p className="desc">{l.description}</p>}
+            <a className="item" href={l.url} target="_blank" rel="noopener noreferrer">
+              <Fav url={l.url} />
+              <span className="body">
+                <span className="line">
+                  <span className="title">{l.title}</span>
+                  <span className="domain">{domainOf(l.url)}</span>
+                  {l.is_broken && <span className="down">may be down</span>}
+                </span>
+                {l.description && <span className="desc">{l.description}</span>}
+              </span>
+              <svg className="go" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                <path d="M5 11l6-6M6 5h5v5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
             {l.tags?.length > 0 && (
               <p className="tags">{l.tags.map((t) => <button key={t} onClick={() => setQ(t)}>{t}</button>)}</p>
             )}
@@ -165,13 +206,16 @@ function Manager({ cats, links, reload }) {
         <h2>All links ({rows.length})</h2>
         <label className="check"><input type="checkbox" checked={onlyDown} onChange={(e) => setOnlyDown(e.target.checked)} /> Only flagged as down</label>
       </div>
-      <ul className="list">
+      <ul className="list one">
         {rows.map((l) => (
-          <li key={l.id} className="row">
-            <div className="line">
-              <span className="title">{l.title}</span>
-              <span className="domain">{domainOf(l.url)} · {catName(l.category_id)}</span>
-              {l.is_broken && <span className="down">may be down</span>}
+          <li key={l.id} className="row admin-row">
+            <Fav url={l.url} />
+            <div className="body">
+              <div className="line">
+                <span className="title">{l.title}</span>
+                <span className="domain">{domainOf(l.url)} · {catName(l.category_id)}</span>
+                {l.is_broken && <span className="down">may be down</span>}
+              </div>
             </div>
             <div className="actions">
               <button onClick={() => edit(l)}>Edit</button>
@@ -203,7 +247,7 @@ export default function App() {
   return (
     <HashRouter>
       <header className="top">
-        <Link to="/" className="brand">yhmf</Link>
+        <Link to="/" className="brand"><span className="logo">y</span>yhmf</Link>
         <Link to="/admin" className="admin">Admin</Link>
       </header>
       <div className="shell">

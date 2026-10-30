@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-30 (redesign)
+- Changed: app/index.html, app/src/App.jsx, app/src/styles.css.
+- Added: docs/DESIGN.md, D21.
+
 ## 2026-10-30 (starter app)
 - Added: app/ (React and Vite), .github/workflows/deploy.yml.
 - Changed: README, PLAN, AGENTS, decisions (D20).

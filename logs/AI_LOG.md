@@ -6,6 +6,15 @@ Newest entries at the top. Use the template at the bottom for new entries.
 
 ---
 
+## Session 8: 2026-10-30: Modern visuals (Claude)
+
+- App deployed and working on GitHub Pages. User asked for modern visuals.
+- Claude redesigned the UI: new tokens, fonts, hero search, favicons, hover states. Changed `app/index.html`, `app/src/App.jsx`, `app/src/styles.css`; added `docs/DESIGN.md`; D21.
+- Not tested: sandbox had no network.
+- Next: user copies the changed files, runs locally, commits and pushes. Then Phase 6 (dead link checker).
+
+---
+
 ## Session 7: 2026-10-30: Admin user (Claude)
 
 - User shared the admin user UID; Claude gave the `admins` insert; it succeeded. Next: run the app locally and report any errors.

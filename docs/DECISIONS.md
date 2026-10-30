@@ -61,3 +61,6 @@ Reason: Supabase no longer exposes new public-schema tables to the Data API auto
 
 ## D20 (2026-10-30): Search and filtering happen in the browser for now
 Reason: for a directory of up to a few hundred links, loading all links once gives instant search with partial-word matching and fewer requests. The database `search` column and GIN index are still there. Switch to `.textSearch('search', ...)` if the list grows past roughly a thousand links (Supabase returns 1000 rows per request by default).
+
+## D21 (2026-10-30): Visual redesign
+Reason: user asked for modern visuals. Teal accent, Bricolage Grotesque and Instrument Sans fonts, per-site favicons with letter fallback, hero search with `/` shortcut, dark mode following the system. Details in `docs/DESIGN.md`. Favicons come from Google's favicon service, which is a privacy tradeoff for visitors.

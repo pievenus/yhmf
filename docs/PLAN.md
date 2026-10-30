@@ -46,11 +46,15 @@ Tick boxes as work completes and note it in `logs/PROGRESS.md`.
 - [ ] Admin filter listing all flagged links
 
 ## Phase 7: Polish
-- [ ] Mobile layout
-- [ ] Favicons per site
+- [x] Mobile layout (chips instead of sidebar)
+- [x] Favicons per site
 - [ ] SEO basics and page titles
 - [ ] Check Supabase free-tier limits before launch
 
 ## Written but not yet tested
 
 Phase 2 to 5 code exists in `app/` but has not been run. Test locally, then deploy.
+
+## Design
+
+Modern redesign written (D21, `docs/DESIGN.md`). Not yet tested in a browser.
